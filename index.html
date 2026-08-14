@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoML DataMind - Automated Machine Learning & Data Intelligence</title>
+  
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- PapaParse CDN for CSV parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  
+  <!-- SheetJS (XLSX) CDN for Excel parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+
+  <!-- Background Glow & Particle Gradients -->
+  <div class="bg-glow glow-1"></div>
+  <div class="bg-glow glow-2"></div>
+  <div class="bg-glow glow-3"></div>
+
+  <!-- Header / Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-brain-circuit"></i>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">DataMind <span class="gradient-text">AutoML</span></span>
+          <span class="brand-tagline">Automated ML & Data Intelligence</span>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <button id="btn-sample-data" class="btn btn-secondary">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Try Sample Datasets
+        </button>
+        <button id="btn-reset" class="btn btn-ghost" style="display: none;">
+          <i class="fa-solid fa-rotate-left"></i> Start Over
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    
+    <!-- STEP 1: DATA INGESTION & FILE UPLOAD -->
+    <section id="section-upload" class="card upload-card active-step">
+      <div class="section-badge"><i class="fa-solid fa-file-arrow-up"></i> Step 1</div>
+      <h2>Upload Your Dataset</h2>
+      <p class="section-desc">Drop your <strong>CSV</strong> or <strong>Excel (.xlsx, .xls)</strong> file below. Data is processed 100% privately in your browser.</p>
+
+      <div id="dropzone" class="dropzone">
+        <input type="file" id="file-input" accept=".csv, .xlsx, .xls" hidden />
+        <div class="dropzone-content">
+          <div class="upload-icon-wrapper">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+          </div>
+          <h3>Drag & Drop dataset file here</h3>
+          <p>or <button type="button" class="btn-link" onclick="document.getElementById('file-input').click()">browse files on your computer</button></p>
+          <div class="format-tags">
+            <span class="tag"><i class="fa-solid fa-file-csv"></i> .CSV</span>
+            <span class="tag"><tag-excel><i class="fa-solid fa-file-excel"></i> .XLSX / .XLS</tag-excel></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Excel Sheet Selector Modal/Bar if multi-sheet -->
+      <div id="sheet-selector-wrapper" class="sheet-selector-wrapper" style="display: none;">
+        <label for="sheet-select"><i class="fa-solid fa-table-cells"></i> Select Excel Worksheet:</label>
+        <select id="sheet-select" class="custom-select"></select>
+      </div>
+
+      <!-- Sample Datasets Grid -->
+      <div class="sample-datasets-container">
+        <div class="divider"><span>OR CHOOSE A READY-TO-USE SAMPLE</span></div>
+        <div class="samples-grid">
+          <div class="sample-card" data-sample="churn">
+            <div class="sample-icon churn-icon"><i class="fa-solid fa-user-slash"></i></div>
+            <div class="sample-info">
+              <h4>Customer Churn Dataset (CSV)</h4>
+              <p>Predict customer retention with 7000+ rows & 12 features.</p>
+              <span class="badge badge-purple">Classification Target</span>
+            </div>
+          </div>
+          <div class="sample-card" data-sample="housing">
+            <div class="sample-icon housing-icon"><i class="fa-solid fa-house-chimney"></i></div>
+            <div class="sample-info">
+              <h4>House Price Valuation (Excel)</h4>
+              <p>Predict property market prices using square feet, rooms & location.</p>
+              <span class="badge badge-blue">Regression Target</span>
+            </div>
+          </div>
+          <div class="sample-card" data-sample="sales">
+            <div class="sample-icon sales-icon"><i class="fa-solid fa-chart-line"></i></div>
+            <div class="sample-info">
+              <h4>E-Commerce Sales Trend (CSV)</h4>
+              <p>Forecast daily & monthly sales revenue over time.</p>
+              <span class="badge badge-green">Time-Series Target</span>
+            </div>
+          </div>
+          <div class="sample-card" data-sample="customers">
+            <div class="sample-icon customer-icon"><i class="fa-solid fa-users-viewfinder"></i></div>
+            <div class="sample-info">
+              <h4>Customer Segmentation (CSV)</h4>
+              <p>Discover hidden buyer personas based on income & spending score.</p>
+              <span class="badge badge-amber">Clustering Target</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DATASET HEALTH & PREVIEW SECTION -->
+    <section id="section-preview" class="card preview-card" style="display: none;">
+      <div class="preview-header">
+        <div>
+          <div class="section-badge"><i class="fa-solid fa-table"></i> Data Inspection</div>
+          <h2 id="dataset-filename">Dataset Summary</h2>
+        </div>
+        <div class="health-pill" id="health-pill">
+          <i class="fa-solid fa-heart-pulse"></i> Data Health Score: <span id="health-score-val">100%</span>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Row -->
+      <div class="stats-cards-row">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-list-ol"></i></div>
+          <div class="stat-data">
+            <span class="stat-value" id="stat-rows">0</span>
+            <span class="stat-label">Total Rows</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-columns"></i></div>
+          <div class="stat-data">
+            <span class="stat-value" id="stat-cols">0</span>
+            <span class="stat-label">Features / Columns</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-calculator"></i></div>
+          <div class="stat-data">
+            <span class="stat-value" id="stat-numeric">0</span>
+            <span class="stat-label">Numeric Columns</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-font"></i></div>
+          <div class="stat-data">
+            <span class="stat-value" id="stat-categorical">0</span>
+            <span class="stat-label">Categorical Columns</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <div class="stat-data">
+            <span class="stat-value" id="stat-missing">0</span>
+            <span class="stat-label">Missing Values</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table Container -->
+      <div class="table-controls">
+        <h3><i class="fa-solid fa-eye"></i> Data Preview (First 10 Rows)</h3>
+        <span class="table-note">Showing parsed columns & automatically detected data types</span>
+      </div>
+      <div class="table-wrapper">
+        <table id="data-preview-table" class="data-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- STEP 2: USER GOAL & INTENT SELECTION -->
+    <section id="section-goal" class="card goal-card" style="display: none;">
+      <div class="section-badge"><i class="fa-solid fa-bullseye"></i> Step 2</div>
+      <h2>What do you want to know from this dataset?</h2>
+      <p class="section-desc">Type your query in plain English or select one of our AI-suggested analysis goals below.</p>
+
+      <div class="prompt-box-wrapper">
+        <div class="prompt-input-group">
+          <i class="fa-solid fa-wand-magic-sparkles prompt-icon"></i>
+          <input type="text" id="user-intent-input" placeholder="e.g. 'I want to predict customer churn', 'Forecast price based on features', or 'Group customers into 3 clusters'..." />
+          <button id="btn-analyze-intent" class="btn btn-primary">
+            <i class="fa-solid fa-play"></i> Auto Train ML
+          </button>
+        </div>
+      </div>
+
+      <div class="suggested-goals-wrapper">
+        <h4><i class="fa-solid fa-lightbulb"></i> Recommended Goals for your Dataset:</h4>
+        <div id="suggested-goals-grid" class="goals-grid">
+          <!-- Dynamic goal cards injected here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TRAINING PROGRESS OVERLAY / CARD -->
+    <section id="section-training" class="card training-card" style="display: none;">
+      <div class="training-content">
+        <div class="spinner-container">
+          <div class="pulse-ring"></div>
+          <i class="fa-solid fa-microchip spinner-icon"></i>
+        </div>
+        <h2 id="training-title">Engine Training Machine Learning Models...</h2>
+        <p id="training-status">Preprocessing dataset, handling nulls, one-hot encoding features...</p>
+        
+        <div class="progress-bar-container">
+          <div id="training-progress-fill" class="progress-bar-fill" style="width: 0%;"></div>
+        </div>
+        
+        <div class="models-queue" id="models-queue">
+          <!-- Dynamic model chips showing training status -->
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 3: RESULTS & BEST MODEL LEADERBOARD -->
+    <section id="section-results" class="results-wrapper" style="display: none;">
+      
+      <!-- Executive Summary Banner -->
+      <div class="card summary-card">
+        <div class="summary-header">
+          <div class="winner-badge">
+            <i class="fa-solid fa-trophy"></i> BEST MODEL WINNER
+          </div>
+          <span class="task-pill" id="result-task-type">CLASSIFICATION</span>
+        </div>
+        
+        <div class="summary-body">
+          <div class="winner-info">
+            <h2 id="best-model-name">Random Forest Classifier</h2>
+            <p id="best-model-explanation">Achieved the highest accuracy score with superior feature interaction handling.</p>
+          </div>
+          
+          <div class="winner-metrics-grid" id="winner-metrics-grid">
+            <!-- Dynamic winner metric cards -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Leaderboard & Feature Importance Grid -->
+      <div class="grid-2col">
+        
+        <!-- Model Comparison Leaderboard -->
+        <div class="card leaderboard-card">
+          <div class="card-title">
+            <h3><i class="fa-solid fa-ranking-star"></i> Model Comparison Leaderboard</h3>
+            <span class="card-subtitle">Automated evaluation on 20% holdout test set</span>
+          </div>
+          
+          <div class="table-wrapper">
+            <table id="leaderboard-table" class="data-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Model Algorithm</th>
+                  <th>Primary Metric</th>
+                  <th>Secondary Metric</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Feature Importance Chart -->
+        <div class="card chart-card">
+          <div class="card-title">
+            <h3><i class="fa-solid fa-chart-bar"></i> Key Data Drivers (Feature Importance)</h3>
+            <span class="card-subtitle">Impact of each feature on predicting <strong id="target-feature-name">Target</strong></span>
+          </div>
+          <div class="chart-container">
+            <canvas id="chart-feature-importance"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dynamic Detailed Visualizations (Confusion Matrix / Scatter Plot / Forecast Chart) -->
+      <div class="grid-2col" id="detail-charts-grid">
+        <div class="card chart-card" id="card-chart-primary">
+          <div class="card-title">
+            <h3 id="title-chart-primary"><i class="fa-solid fa-chart-pie"></i> Model Evaluation Visualizer</h3>
+          </div>
+          <div class="chart-container">
+            <canvas id="chart-evaluation-primary"></canvas>
+          </div>
+        </div>
+
+        <div class="card chart-card" id="card-chart-secondary">
+          <div class="card-title">
+            <h3 id="title-chart-secondary"><i class="fa-solid fa-chart-line"></i> Actual vs Predicted Distribution</h3>
+          </div>
+          <div class="chart-container">
+            <canvas id="chart-evaluation-secondary"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: INTERACTIVE PREDICTION SIMULATOR (SANDBOX) -->
+      <div class="card simulator-card">
+        <div class="simulator-header">
+          <div>
+            <div class="section-badge"><i class="fa-solid fa-sliders"></i> Interactive Sandbox</div>
+            <h2>Test Live Predictions with Your Best Model</h2>
+            <p class="section-desc">Change feature values below to get real-time predictions from your trained <span id="simulator-model-name" class="highlight-text">Model</span>.</p>
+          </div>
+        </div>
+
+        <div class="simulator-body">
+          <div class="simulator-inputs-grid" id="simulator-inputs-form">
+            <!-- Dynamic input sliders / inputs generated based on schema -->
+          </div>
+
+          <div class="simulator-output-box">
+            <div class="prediction-res-header">
+              <span>MODEL PREDICTION RESULT</span>
+              <i class="fa-solid fa-bolt"></i>
+            </div>
+            
+            <div class="prediction-main-val" id="prediction-result-val">
+              --
+            </div>
+
+            <div id="prediction-confidence-bar" class="confidence-bar-container" style="display: none;">
+              <div class="confidence-label">
+                <span>Confidence Score</span>
+                <span id="confidence-percentage">0%</span>
+              </div>
+              <div class="confidence-track">
+                <div id="confidence-fill" class="confidence-fill" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <p class="simulator-tip"><i class="fa-solid fa-circle-info"></i> Adjust feature inputs on the left to see prediction update live.</p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <p>DataMind AutoML Engine &bull; Private Browser-Side Machine Learning &bull; Built with HTML5, Vanilla CSS, JS & Chart.js</p>
+  </footer>
+
+  <!-- App JavaScript Modules -->
+  <script src="js/dataParser.js"></script>
+  <script src="js/intentResolver.js"></script>
+  <script src="js/preprocessor.js"></script>
+  <script src="js/mlEngine.js"></script>
+  <script src="js/evaluator.js"></script>
+  <script src="js/sampleDatasets.js"></script>
+  <script src="js/uiController.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
